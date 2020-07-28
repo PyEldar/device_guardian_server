@@ -9,8 +9,8 @@ class Event(Base):
     __tablename__ = "events"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
-    description = Column(String, index=True)
+    title = Column(String)
+    description = Column(String)
     user_id = Column(Integer, ForeignKey("users.id"))
     device_id = Column(Integer, ForeignKey("devices.id"))
 
