@@ -13,11 +13,11 @@ router = APIRouter()
 
 @router.post(
     "/users/{user_id}/events/",
-    response_model=events_schemas.event,
+    response_model=events_schemas.Event,
     dependencies=[Depends(deps.get_current_superuser)],
 )
 def create_event_for_user(
-    user_id: int, event: events_schemas.eventCreate, db: Session = Depends(deps.get_db)
+    user_id: int, event: events_schemas.EventCreate, db: Session = Depends(deps.get_db)
 ):
     """
     Create an event for a specific user.
@@ -27,9 +27,9 @@ def create_event_for_user(
     return crud.create_user_event(db=db, event=event, user_id=user_id)
 
 
-@router.post("/events/", response_model=events_schemas.event)
+@router.post("/events/", response_model=events_schemas.Event)
 def create_event_for_current_user(
-    event: events_schemas.eventCreate,
+    event: events_schemas.EventCreate,
     db: Session = Depends(deps.get_db),
     current_user: users_models.User = Depends(deps.get_current_user),
 ):
@@ -41,7 +41,7 @@ def create_event_for_current_user(
     return crud.create_user_event(db=db, event=event, user_id=current_user.id)
 
 
-@router.get("/events/", response_model=List[events_schemas.event])
+@router.get("/events/", response_model=List[events_schemas.Event])
 def read_events(
     skip: int = 0,
     limit: int = 100,

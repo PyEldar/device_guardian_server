@@ -1,16 +1,16 @@
 from pydantic import BaseModel
 
 
-class eventBase(BaseModel):
+class EventBase(BaseModel):
     title: str
     description: str = None
 
 
-class eventCreate(eventBase):
+class EventCreate(EventBase):
     pass
 
 
-class event(eventBase):
+class Event(EventBase):
     id: int
 
     class Config:

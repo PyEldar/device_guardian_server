@@ -17,7 +17,7 @@ class UserCreate(UserBase):
 class User(UserBase):
     id: int
     is_active: bool
-    events: List[events_schemas.event] = []
+    events: List[events_schemas.Event] = []
     devices: List[devices_schemas.Device] = []
 
     class Config:

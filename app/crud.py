@@ -1,7 +1,9 @@
 from sqlalchemy.orm import Session
 
 from app.schemas import users as users_schemas, events as events_schemas
+from app.schemas import devices as devices_schemas
 from app.models import users as users_models, events as events_models
+from app.models import devices as devices_models
 from app import security
 
 
@@ -36,16 +38,25 @@ def authenticate_user(db: Session, email: str, password: str):
 
 
 def get_events(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(events_models.event).offset(skip).limit(limit).all()
+    return db.query(events_models.Event).offset(skip).limit(limit).all()
 
 
 def get_user_events(db: Session, user_id: int, skip: int = 0, limit: int = 10):
-    return db.query(events_models.event).filter(events_models.event.owner_id == user_id).offset(skip).limit(limit).all()
+    return db.query(events_models.Event).filter(events_models.Event.user_id == user_id).offset(skip).limit(limit).all()
 
 
-def create_user_event(db: Session, event: events_schemas.eventCreate, user_id: int):
-    db_event = events_models.event(**event.dict(), owner_id=user_id)
+def create_user_event(db: Session, event: events_schemas.EventCreate, user_id: int):
+    db_event = events_models.Event(**event.dict(), owner_id=user_id)
     db.add(db_event)
     db.commit()
     db.refresh(db_event)
     return db_event
+
+def get_user_devices(db: Session, user_id: int, skip: int = 0, limit: int = 10):
+    return db.query(devices_models.Device).filter(devices_models.Device.owner_id == user_id).offset(skip).limit(limit).all()
+
+def get_device_events(db: Session, device_id: int, skip: int = 0, limit: int = 10):
+    return db.query(events_models.Event).filter(events_models.Event.device_id == device_id).offset(skip).limit(limit).all()
+
+def get_device(db: Session, device_id: int):
+    return db.query(devices_models.Device).filter(devices_models.Device.id == device_id).first()

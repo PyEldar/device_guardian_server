@@ -14,7 +14,7 @@ class DeviceCreate(BaseModel):
 class Device(DeviceBase):
     id: int
     owner_id: int
-    events: List[events_schemas.event] = []
+    events: List[events_schemas.Event] = []
 
     class Config:
         orm_mode = True
