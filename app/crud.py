@@ -46,17 +46,34 @@ def get_user_events(db: Session, user_id: int, skip: int = 0, limit: int = 10):
 
 
 def create_user_event(db: Session, event: events_schemas.EventCreate, user_id: int):
-    db_event = events_models.Event(**event.dict(), owner_id=user_id)
+    db_event = events_models.Event(**event.dict(), user_id=user_id)
     db.add(db_event)
     db.commit()
     db.refresh(db_event)
     return db_event
 
+
 def get_user_devices(db: Session, user_id: int, skip: int = 0, limit: int = 10):
     return db.query(devices_models.Device).filter(devices_models.Device.owner_id == user_id).offset(skip).limit(limit).all()
+
 
 def get_device_events(db: Session, device_id: int, skip: int = 0, limit: int = 10):
     return db.query(events_models.Event).filter(events_models.Event.device_id == device_id).offset(skip).limit(limit).all()
 
+
 def get_device(db: Session, device_id: int):
     return db.query(devices_models.Device).filter(devices_models.Device.id == device_id).first()
+
+
+def create_user_device(db: Session, device: devices_schemas.DeviceCreate, user_id: int):
+    db_device = devices_models.Device(**device.dict(), owner_id=user_id)
+    db.add(db_device)
+    db.commit()
+    db.refresh(db_device)
+    return db_device
+
+
+def create_device_pairing_code(db: Session, device_id: int, otp_code: str):
+    db.query(devices_models.Device).\
+        filter(devices_models.Device.id == device_id).\
+        update({devices_models.Device.pairing_code: otp_code})

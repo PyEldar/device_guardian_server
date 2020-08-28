@@ -10,6 +10,7 @@ class Device(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
     owner_id = Column(Integer, ForeignKey("users.id"))
+    pairing_code = Column(String, default=False)
 
     owner = relationship("User", back_populates="devices")
     events = relationship("Event", back_populates="device")

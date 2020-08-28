@@ -15,6 +15,10 @@ class Device(DeviceBase):
     id: int
     owner_id: int
     events: List[events_schemas.Event] = []
+    paired: bool
 
     class Config:
         orm_mode = True
+
+class DevicePair(DeviceBase):
+    pairing_code: str
