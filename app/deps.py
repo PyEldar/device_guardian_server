@@ -13,6 +13,7 @@ from app.database import SessionLocal
 from app.settings import settings
 
 reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/login/access-token")
+reusable_device_oauth2 = OAuth2PasswordBearer(tokenUrl="/login/device-token")
 
 
 def get_db():
@@ -48,3 +49,22 @@ def get_current_superuser(current_user: models.users.User = Depends(get_current_
             status_code=status.HTTP_403_FORBIDDEN, detail="Not the superuser"
         )
     return current_user
+
+
+def get_current_device(
+    db: Session = Depends(get_db), token: str = Depends(reusable_device_oauth2)
+):
+    try:
+        payload = jwt.decode(
+            token, settings.secret_key, algorithms=[security.ALGORITHM]
+        )
+        token_data = schemas.auth.TokenPayload(**payload)
+    except (jwt.JWTError, ValidationError):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
+        )
+    device = crud.get_device(db, device_id=token_data.sub)
+    if not device:
+        raise HTTPException(status_code=404, detail="Device not found")
+    return device

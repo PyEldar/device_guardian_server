@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -6,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.models import users as users_models
 from app.models import devices as devices_models
 from app.schemas import devices as devices_schemas
-from app import crud, deps
+from app import crud, deps, security
 
 router = APIRouter()
 
@@ -55,7 +56,7 @@ def create_device_for_user(
     return crud.create_user_device(db, device, current_user.id)
 
 @router.get(
-    "devices/{device_id}/pair",
+    "/devices/{device_id}/pair",
     response_model=devices_schemas.DevicePair
 )
 def pair_device(
@@ -73,3 +74,7 @@ def pair_device(
         raise HTTPException(status_code=404, detail="Device not found")
     if not db_device.owner_id == current_user.id:
         raise HTTPException(status_code=403)
+    crud.create_device_pairing_code(db, db_device.id, security.generate_pairing_otp())
+    db.refresh(db_device)
+    print(db_device)
+    return db_device

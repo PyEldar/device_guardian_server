@@ -25,5 +25,5 @@ def get_password_hash(password: str):
     return pwd_context.hash(password)
 
 
-def generate_pairing_otp() -> pyotp.TOTP:
-    return 
+def generate_pairing_otp() -> str:
+    return pyotp.TOTP(pyotp.random_base32()).now()

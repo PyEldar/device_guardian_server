@@ -4,8 +4,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from app.schemas import msg as msg_schemas
 from app.schemas import auth as auth_schemas
-from app.schemas import users as users_schemas
-from app.models import users as users_models
+from app.models import devices as devices_models
 from app import crud, deps, security
 from app.utils.auth import generate_password_reset_token, send_reset_password_email, verify_password_reset_token
 from app.security import get_password_hash
@@ -28,6 +27,24 @@ def login_access_token(
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     return {
         "access_token": security.create_access_token(subject=user.id),
+        "token_type": "bearer",
+    }
+
+
+@router.post("/login/device-token", response_model=auth_schemas.Token)
+def login_device_token(
+    db: Session = Depends(deps.get_db), pairing_code: str = Body(...)
+):
+    """
+    Get an access token for future device requests
+    """
+    device: devices_models.Device = crud.get_device_by_pairing_code(db, pairing_code)
+    if not device:
+        raise HTTPException(status_code=400, detail="Incorrect pairing code")
+    if not device.paired:
+        crud.update_device_paired_state(db, device.id, paired=True)
+    return {
+        "access_token": security.create_access_token(subject=device.id),
         "token_type": "bearer",
     }
 

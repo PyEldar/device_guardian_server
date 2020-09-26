@@ -8,7 +8,7 @@ from app.schemas import events as events_schemas
 class DeviceBase(BaseModel):
     name: str
 
-class DeviceCreate(BaseModel):
+class DeviceCreate(DeviceBase):
     pass
 
 class Device(DeviceBase):
@@ -22,3 +22,6 @@ class Device(DeviceBase):
 
 class DevicePair(DeviceBase):
     pairing_code: str
+
+    class Config:
+        orm_mode = True

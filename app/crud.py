@@ -45,8 +45,8 @@ def get_user_events(db: Session, user_id: int, skip: int = 0, limit: int = 10):
     return db.query(events_models.Event).filter(events_models.Event.user_id == user_id).offset(skip).limit(limit).all()
 
 
-def create_user_event(db: Session, event: events_schemas.EventCreate, user_id: int):
-    db_event = events_models.Event(**event.dict(), user_id=user_id)
+def create_device_event(db: Session, event: events_schemas.EventCreate, device_id: int, user_id: int):
+    db_event = events_models.Event(**event.dict(), device_id=device_id, user_id=user_id)
     db.add(db_event)
     db.commit()
     db.refresh(db_event)
@@ -73,7 +73,19 @@ def create_user_device(db: Session, device: devices_schemas.DeviceCreate, user_i
     return db_device
 
 
-def create_device_pairing_code(db: Session, device_id: int, otp_code: str):
+def create_device_pairing_code(db: Session, device_id: int, pairing_code: str):
     db.query(devices_models.Device).\
         filter(devices_models.Device.id == device_id).\
-        update({devices_models.Device.pairing_code: otp_code})
+        update({devices_models.Device.pairing_code: pairing_code})
+    db.commit()
+
+
+def get_device_by_pairing_code(db: Session, pairing_code: str):
+    return db.query(devices_models.Device).filter(devices_models.Device.pairing_code == pairing_code).first()
+
+
+def update_device_paired_state(db: Session, device_id: int, paired: bool):
+    db.query(devices_models.Device).\
+        filter(devices_models.Device.id == device_id).\
+        update({devices_models.Device.paired: paired})
+    db.commit()
