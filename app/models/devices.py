@@ -15,3 +15,4 @@ class Device(Base):
 
     owner = relationship("User", back_populates="devices")
     events = relationship("Event", back_populates="device")
+    lock_requests = relationship("LockRequest", back_populates="device")

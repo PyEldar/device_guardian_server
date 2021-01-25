@@ -15,13 +15,14 @@ from sqlalchemy.orm import Session
 from app import crud
 from app.schemas import users as users_schemas
 from app.database import Base
-from app.routers import auth, events, users, devices
+from app.routers import auth, events, users, devices, lock_requests
 from app.database import SessionLocal, engine
 from app.settings import settings
 
 app = FastAPI()
 
 app.include_router(users.router, tags=["users"])
+app.include_router(lock_requests.router, tags=["lock_requests"])
 app.include_router(events.router, tags=["events"])
 app.include_router(auth.router, tags=["auth"])
 app.include_router(devices.router, tags=["devices"])

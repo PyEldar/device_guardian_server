@@ -6,5 +6,9 @@ class Token(BaseModel):
     token_type: str
 
 
+class PairingCode(BaseModel):
+    pairing_code: str
+
+
 class TokenPayload(BaseModel):
-    sub: int
+    sub: str

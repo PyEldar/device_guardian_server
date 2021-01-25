@@ -4,6 +4,8 @@ from app.schemas import users as users_schemas, events as events_schemas
 from app.schemas import devices as devices_schemas
 from app.models import users as users_models, events as events_models
 from app.models import devices as devices_models
+from app.schemas import lock_requests as lock_requests_schemas
+from app.models import lock_requests as lock_requests_models
 from app import security
 
 
@@ -89,3 +91,33 @@ def update_device_paired_state(db: Session, device_id: int, paired: bool):
         filter(devices_models.Device.id == device_id).\
         update({devices_models.Device.paired: paired})
     db.commit()
+
+
+def create_device_lock_request(db: Session, lock_request: lock_requests_schemas.LockRequestCreate, device_id: int):
+    db_lock_request = lock_requests_models.LockRequest(**lock_request.dict())
+    db.add(db_lock_request)
+    db.commit()
+    db.refresh(db_lock_request)
+    return db_lock_request
+
+
+def get_device_lock_requests(db: Session, device_id: int, skip: int = 0, limit: int = 100):
+    return db.query(lock_requests_models.LockRequest).filter(lock_requests_models.LockRequest.device_id == device_id).offset(skip).limit(limit).all()
+
+
+def update_device_lock_requests(db: Session, device_id: int, new_state: str):
+    db.query(lock_requests_models.LockRequest).\
+        filter(lock_requests_models.LockRequest.device_id == device_id).\
+        update({lock_requests_models.LockRequest.state: new_state})
+    db.commit()
+
+
+def update_lock_request_state(db: Session, id: int, new_state: str):
+    db.query(lock_requests_models.LockRequest).\
+        filter(lock_requests_models.LockRequest.id == id).\
+        update({lock_requests_models.LockRequest.state: new_state})
+    db.commit()
+
+
+def get_lock_request(db: Session, lock_request_id: int):
+    return db.query(lock_requests_models.LockRequest).filter(lock_requests_models.LockRequest.id == lock_request_id).first()

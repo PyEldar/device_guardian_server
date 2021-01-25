@@ -26,25 +26,25 @@ def login_access_token(
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     return {
-        "access_token": security.create_access_token(subject=user.id),
+        "access_token": security.create_access_token(subject=f"user:{user.id}"),
         "token_type": "bearer",
     }
 
 
 @router.post("/login/device-token", response_model=auth_schemas.Token)
 def login_device_token(
-    db: Session = Depends(deps.get_db), pairing_code: str = Body(...)
+    db: Session = Depends(deps.get_db), pairing_code: auth_schemas.PairingCode = Depends()
 ):
     """
     Get an access token for future device requests
     """
-    device: devices_models.Device = crud.get_device_by_pairing_code(db, pairing_code)
+    device: devices_models.Device = crud.get_device_by_pairing_code(db, pairing_code.pairing_code)
     if not device:
         raise HTTPException(status_code=400, detail="Incorrect pairing code")
     if not device.paired:
         crud.update_device_paired_state(db, device.id, paired=True)
     return {
-        "access_token": security.create_access_token(subject=device.id),
+        "access_token": security.create_access_token(subject=f"device:{device.id}"),
         "token_type": "bearer",
     }
 

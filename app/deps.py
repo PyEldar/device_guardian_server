@@ -12,8 +12,8 @@ from app import security
 from app.database import SessionLocal
 from app.settings import settings
 
-reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/login/access-token")
 reusable_device_oauth2 = OAuth2PasswordBearer(tokenUrl="/login/device-token")
+reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/login/access-token")
 
 
 def get_db():
@@ -32,12 +32,14 @@ def get_current_user(
             token, settings.secret_key, algorithms=[security.ALGORITHM]
         )
         token_data = schemas.auth.TokenPayload(**payload)
-    except (jwt.JWTError, ValidationError):
+        token_user_id = int(token_data.sub.replace("user:", ""))
+    except (jwt.JWTError, ValidationError, ValueError):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
         )
-    user = crud.get_user(db, user_id=token_data.sub)
+
+    user = crud.get_user(db, user_id=token_user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
@@ -59,12 +61,13 @@ def get_current_device(
             token, settings.secret_key, algorithms=[security.ALGORITHM]
         )
         token_data = schemas.auth.TokenPayload(**payload)
-    except (jwt.JWTError, ValidationError):
+        token_device_id = int(token_data.sub.replace("device:", ""))
+    except (jwt.JWTError, ValidationError, ValueError):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
         )
-    device = crud.get_device(db, device_id=token_data.sub)
+    device = crud.get_device(db, device_id=token_device_id)
     if not device:
         raise HTTPException(status_code=404, detail="Device not found")
     return device
